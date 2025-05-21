@@ -14,43 +14,122 @@ int TempoAtendimentoTodosClientes = 0;
 int AcumuladorComprimentoTotalFila = 0;
 bool CaixaVazio = true;
 
+
+
 //=======================================================
 // FILA (estrutura de dados FIFO).
 // Função de colocar na fila um cliente
 // Função de retirar da fila o cliente mais antigo
 // Cada cliente guarda um número, que é a hora em que entrou na fila.
 //=======================================================
+
+
+#define MAX_QUEUE_SIZE 1000
+
+typedef struct {
+    int id;
+    int entrada;
+    int saida;
+    int tempo_espera;
+} Cliente;
+
+typedef struct {
+    Cliente items[MAX_QUEUE_SIZE];
+    int front;
+    int rear;
+} Queue;
+
+static Queue fila_atendimento;
+
+void initializeQueue() {
+    fila_atendimento.front = -1;
+    fila_atendimento.rear = -1;
+}
+
+bool isEmpty() {
+    return fila_atendimento.front == -1;
+}
+
+void AdicionarCliente(Cliente value) {
+    if (fila_atendimento.rear == MAX_QUEUE_SIZE - 1) {
+        printf("A fila está cheia!\n");
+        return;
+    }
+    if (isEmpty()) {
+        fila_atendimento.front = 0;
+    }
+    fila_atendimento.rear++;
+    fila_atendimento.items[fila_atendimento.rear] = value;
+}
+
+Cliente RemoverCliente() {
+    Cliente emptyCliente = {0};
+    if (isEmpty()) {
+        printf("Fila vazia!\n");
+        return emptyCliente;
+    }
+    Cliente item = fila_atendimento.items[fila_atendimento.front];
+    if (fila_atendimento.front >= fila_atendimento.rear) {
+        fila_atendimento.front = -1;
+        fila_atendimento.rear = -1;
+    } else {
+        fila_atendimento.front++;
+    }
+    return item;
+}
+
 // Função que sorteia número inteiro no intervalo [A, B]
 int Sorteie_Entre_A_e_B (int A, int B) {
     return A + (rand() % (B - A));
 }
 //=======================================================
 void main () {
+    int terminoAtendimento = 1;
+    int tempoAtendimento = 0;
     while (Numero_Total_Clientes_Atendidos < 1000) {
         Relogio = Relogio + 1;
+        AcumuladorComprimentoTotalFila = AcumuladorComprimentoTotalFila + fila_atendimento.rear;
         // Tire "fotografia" da fila; some o comprimento atual da fila a um acumulador,
         // que será usado para calcular o comprimento médio da fila.
+        Cliente novoCliente;
+        novoCliente.id = Numero_Total_Clientes_Atendidos;
+        novoCliente.entrada = Relogio;
+
         // Talvez gere um cliente, talvez não!
         // Se gerou, coloque na fila; além disso, marque nele que horas são agora,
         // porque depois queremos saber quanto tempo ficou na fila.
+        if (Sorteie_Entre_A_e_B(1, 10) % 2 == 0 )
+            AdicionarCliente(novoCliente);
+
         // Se caixa está atendendo alguém, e chegou hora de fim desse atendimento {
         // some o tempo que demorou esse atendimento
         // num acumulador de tempo de atendimento de todos clientes;
         // some +1, em um acumulador que conta o número total de clientes atendidos.
         // deixe o caixa vazio.
-        CaixaVazio = true;
+        //CaixaVazio = true;
         //}//SE
         // Se caixa estiver vazio, {
         // marque caixa ocupado
-        CaixaVazio = false;
-        // retire primeiro cliente da fila.
-        // Sorteie quanto tempo demorará esse atendimento,
-        // guarde numa variável quanto é essa demora,
-        // guarde em outra variável a que horas o atendimento terminará.
-        // Veja a que horas esse cliente havia entrado na fila,
-        // e calcule quanto tempo ele ficou esperando; some esse tempo de espera
-        // no tempo total de espera dos clientes.
-        //}//SE
+
+        if (CaixaVazio && !isEmpty()) {    
+            CaixaVazio = false;
+            // retire primeiro cliente da fila.
+            Cliente clienteEmAtendimento = RemoverCliente();
+            // Sorteie quanto tempo demorará esse atendimento,
+            // guarde numa variável quanto é essa demora,
+            tempoAtendimento = Sorteie_Entre_A_e_B(1, 10);
+            // guarde em outra variável a que horas o atendimento terminará.
+            terminoAtendimento = Relogio + tempoAtendimento;
+            // Veja a que horas esse cliente havia entrado na fila,
+            // e calcule quanto tempo ele ficou esperando; some esse tempo de espera
+            // no tempo total de espera dos clientes.
+            TempoTotalEsperaClientes = TempoTotalEsperaClientes + (Relogio - clienteEmAtendimento.entrada);
+        }//SE
+        if (!CaixaVazio && terminoAtendimento == Relogio) {   
+            TempoAtendimentoTodosClientes = TempoAtendimentoTodosClientes + tempoAtendimento;
+            Numero_Total_Clientes_Atendidos++;
+            CaixaVazio = true;
+        }
     }//WHILE
     printf ("Simulação demorou = %d\n", Relogio);
     printf ("Total Clientes = %d\n" , Numero_Total_Clientes_Atendidos);
