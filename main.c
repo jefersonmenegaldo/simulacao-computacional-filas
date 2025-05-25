@@ -1,6 +1,17 @@
 /*===============================================================================================
 Dentro deste espaço,
 comente tudo o que você fez para Calibrar a simulação.
+
+  Para calibrar a simulação foi necessário trabalhar com os valores de tempo de atendimento e a 
+quantidade de clientes que entram na fila, pois esses valores influenciam diretamente nas métricas 
+da fila. Quanto menor o tempo de atendimento, maior será quantidade de clientes atendidos em um
+determinado período, e quanto mais clientes entram na fila, maior será o comprimento médio da fila, 
+assim como o tempo de espera.
+    Foram testadas diversas combinações de valores para o tempo de atendimento e a quantidade de clientes
+que entram na fila, e a partir desses resultados foram escolhidos os valores que mais se aproximavam 
+da meta proposta. O exercício foi realizado partindo do princípio de que a fila trabalha somente com
+um caixa, comforme a descrição do problema, sendo esse um dos pontos de melhoria para o funcionamento da fila.
+O número de clientes atendidos foi fixado em 1000. 
 ===============================================================================================*/
 
 #include <stdio.h>
@@ -14,8 +25,6 @@ int TempoAtendimentoTodosClientes = 0;
 int AcumuladorComprimentoTotalFila = 0;
 bool CaixaVazio = true;
 
-
-
 //=======================================================
 // FILA (estrutura de dados FIFO).
 // Função de colocar na fila um cliente
@@ -23,9 +32,7 @@ bool CaixaVazio = true;
 // Cada cliente guarda um número, que é a hora em que entrou na fila.
 //=======================================================
 
-
 #define MAX_QUEUE_SIZE 1000
-
 typedef struct {
     int id;
     int entrada;
@@ -98,7 +105,7 @@ void main () {
         // Talvez gere um cliente, talvez não!
         // Se gerou, coloque na fila; além disso, marque nele que horas são agora,
         // porque depois queremos saber quanto tempo ficou na fila.
-        if (Sorteie_Entre_A_e_B(1, 10) % 2 == 0 )
+        if (Sorteie_Entre_A_e_B(1, 19) == 1 )
             AdicionarCliente(novoCliente);
 
         // Se caixa está atendendo alguém, e chegou hora de fim desse atendimento {
@@ -117,7 +124,7 @@ void main () {
             Cliente clienteEmAtendimento = RemoverCliente();
             // Sorteie quanto tempo demorará esse atendimento,
             // guarde numa variável quanto é essa demora,
-            tempoAtendimento = Sorteie_Entre_A_e_B(1, 10);
+            tempoAtendimento = Sorteie_Entre_A_e_B(1, 27);
             // guarde em outra variável a que horas o atendimento terminará.
             terminoAtendimento = Relogio + tempoAtendimento;
             // Veja a que horas esse cliente havia entrado na fila,
@@ -130,11 +137,12 @@ void main () {
             Numero_Total_Clientes_Atendidos++;
             CaixaVazio = true;
         }
-    }//WHILE
-    printf ("Simulação demorou = %d\n", Relogio);
-    printf ("Total Clientes = %d\n" , Numero_Total_Clientes_Atendidos);
 
-    //print... Comprimento medio fila = (AcumuladorComprimentoTotalFila / Relogio);
-    //print... Tempo medio espera = (TempoTotalEsperaClientes / Numero_Total_Clientes_Atendidos);
-    //print... Tempo medio atendimento = (TempoAtendimentoTodosClientes / Numero_Total_Clientes_Atendidos);
+    }//WHILE
+    printf("Simulação demorou = %d\n", Relogio);
+    printf("Total Clientes = %d\n" , Numero_Total_Clientes_Atendidos);
+
+    printf("Comprimento medio fila = %d\n", AcumuladorComprimentoTotalFila / Relogio);
+    printf("Tempo medio espera = %d\n", TempoTotalEsperaClientes / Numero_Total_Clientes_Atendidos);
+    printf("Tempo medio atendimento = %d\n", TempoAtendimentoTodosClientes / Numero_Total_Clientes_Atendidos);
 }
